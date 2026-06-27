@@ -1,0 +1,51 @@
+{
+  "name": "google-cli",
+  "description": "Google Places API (New) CLI — Text Search and Nearby Search, authed via GOOGLE_API_KEY",
+  "version": "0.1.0",
+  "author": "aaron.chan",
+  "bin": {
+    "google-cli": "./bin/run.js"
+  },
+  "dependencies": {
+    "@oclif/core": "^4",
+    "@oclif/plugin-help": "^6"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "oclif": "^4",
+    "ts-node": "^10",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "files": [
+    "./bin",
+    "./dist",
+    "./oclif.manifest.json"
+  ],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "type": "module",
+  "oclif": {
+    "bin": "google-cli",
+    "dirname": "google-cli",
+    "commands": "./dist/commands",
+    "plugins": [
+      "@oclif/plugin-help"
+    ],
+    "topicSeparator": " ",
+    "additionalHelpFlags": [
+      "-h"
+    ],
+    "additionalVersionFlags": [
+      "-v"
+    ]
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -b && oclif manifest",
+    "postpack": "rm -f oclif.manifest.json",
+    "prepack": "oclif manifest"
+  },
+  "types": "dist/index.d.ts"
+}

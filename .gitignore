@@ -1,0 +1,7 @@
+dist/
+node_modules/
+oclif.manifest.json
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+*.log
+.DS_Store
