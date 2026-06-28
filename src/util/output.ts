@@ -48,15 +48,42 @@ function renderReviews(reviews: unknown[]): string {
   return lines.join('\n')
 }
 
+// Render the `photos` array. Photos are binary, so we show each one's
+// dimensions + author and a Google Maps link to view it (the photo's own
+// googleMapsUri — no API key, unlike the getMedia endpoint):
+//   photos:
+//     - 1440x810  Ukai Japanese Bistro
+//       https://www.google.com/maps/place//data=…
+function renderPhotos(photos: unknown[]): string {
+  const lines = ['photos:']
+  for (const ph of photos) {
+    const photo = (ph ?? {}) as Record<string, unknown>
+    const w = photo.widthPx
+    const h = photo.heightPx
+    const dims = w !== undefined && h !== undefined ? `${w}x${h}` : ''
+    const attrs = Array.isArray(photo.authorAttributions) ? photo.authorAttributions : []
+    const author = attrs.length > 0 ? String((attrs[0] as Record<string, unknown>).displayName ?? '') : ''
+    const uri = photo.googleMapsUri ? String(photo.googleMapsUri) : ''
+
+    const head = [dims, author].filter(Boolean).join('  ')
+    lines.push(`  - ${head}`.trimEnd())
+    if (uri) lines.push(`    ${uri}`)
+  }
+  return lines.join('\n')
+}
+
 // Render a single requested field as its full text line(s), or '' to skip.
 function renderField(place: Place, fieldPath: string): string {
   const key = fieldPath.replace(/^places\./, '').split('.')[0]
   const value = (place as Record<string, unknown>)[key]
   if (value === undefined || value === null) return ''
 
-  // reviews: multi-line, human-readable.
+  // reviews / photos: multi-line, human-readable.
   if (key === 'reviews' && Array.isArray(value)) {
     return value.length === 0 ? '' : renderReviews(value)
+  }
+  if (key === 'photos' && Array.isArray(value)) {
+    return value.length === 0 ? '' : renderPhotos(value)
   }
 
   const v = formatValue(key, value)
@@ -79,7 +106,7 @@ function formatValue(key: string, value: unknown): string {
   }
   if (Array.isArray(value)) {
     // Bulky arrays that aren't useful inline: summarize as a count.
-    if (key === 'photos' || key === 'types' || key === 'addressComponents') {
+    if (key === 'types' || key === 'addressComponents') {
       return `${value.length}`
     }
     // Other arrays: join scalar items; stringify object items.
