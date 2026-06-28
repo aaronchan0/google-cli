@@ -27,7 +27,7 @@ export default class Photo extends BaseCommand {
     ...BaseCommand.baseFlags,
     out: Flags.string({char: 'o', description: 'download the image to this file path'}),
     url: Flags.boolean({description: 'print the short-lived photoUri instead of downloading (skipHttpRedirect=true)'}),
-    'max-width': Flags.integer({description: 'maxWidthPx (1-4800)'}),
+    'max-width': Flags.integer({description: 'maxWidthPx (1-4800); defaults to 1600 if neither dimension is set'}),
     'max-height': Flags.integer({description: 'maxHeightPx (1-4800)'}),
   }
 
@@ -43,8 +43,10 @@ export default class Photo extends BaseCommand {
     }
 
     const clamp = (n?: number) => (n === undefined ? undefined : Math.min(Math.max(n, 1), 4800))
-    const maxWidthPx = clamp(flags['max-width'])
+    let maxWidthPx = clamp(flags['max-width'])
     const maxHeightPx = clamp(flags['max-height'])
+    // getMedia requires at least one dimension; default the width if neither given.
+    if (maxWidthPx === undefined && maxHeightPx === undefined) maxWidthPx = 1600
 
     if (flags.url) {
       const media = await getPhotoUri({photoName: args.name, apiKey, maxWidthPx, maxHeightPx, debug: flags.debug})
