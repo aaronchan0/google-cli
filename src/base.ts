@@ -10,12 +10,20 @@ import {emit, type OutputMode} from './util/output.js'
 // Places API "Place" resource. See the full list and per-field meanings at:
 const FIELD_DOC = 'https://developers.google.com/maps/documentation/places/web-service/reference/rest/v1/places'
 
+// Field/output flags shared by the search commands (text-search, nearby).
+// Spread into a command's `static flags` — NOT into baseFlags, so commands like
+// `photo` that don't return place lists don't inherit them.
+export const searchFlags = {
+  json: Flags.boolean({description: 'Emit the raw JSON response instead of a text table'}),
+  fields: Flags.string({description: `Comma-separated field list that REPLACES the defaults. Field names: ${FIELD_DOC}`}),
+  'add-fields': Flags.string({description: 'Comma-separated fields to ADD to the defaults (see --fields for the field list)'}),
+  'drop-fields': Flags.string({description: 'Comma-separated fields to REMOVE from the defaults (see --fields for the field list)'}),
+}
+
 export abstract class BaseCommand extends Command {
+  // baseFlags are auto-merged into EVERY command by oclif, so keep them to the
+  // universally-applicable ones only.
   static baseFlags = {
-    json: Flags.boolean({description: 'Emit the raw JSON response instead of a text table'}),
-    fields: Flags.string({description: `Comma-separated field list that REPLACES the defaults. Field names: ${FIELD_DOC}`}),
-    'add-fields': Flags.string({description: 'Comma-separated fields to ADD to the defaults (see --fields for the field list)'}),
-    'drop-fields': Flags.string({description: 'Comma-separated fields to REMOVE from the defaults (see --fields for the field list)'}),
     'api-key': Flags.string({description: 'API key (overrides the GOOGLE_API_KEY env var)'}),
     debug: Flags.boolean({description: 'Log request URL, body, field mask, and HTTP status to stderr'}),
   }

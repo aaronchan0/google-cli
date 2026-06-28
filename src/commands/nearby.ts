@@ -1,6 +1,6 @@
 import {Flags} from '@oclif/core'
 
-import {BaseCommand} from '../base.js'
+import {BaseCommand, searchFlags} from '../base.js'
 import {ENDPOINTS} from '../places-client.js'
 import {resolveFields} from '../util/fields.js'
 import {renderPlaces} from '../util/output.js'
@@ -17,6 +17,7 @@ export default class Nearby extends BaseCommand {
 
   static flags = {
     ...BaseCommand.baseFlags,
+    ...searchFlags,
     lat: Flags.string({description: 'circle center latitude', required: true}),
     lng: Flags.string({description: 'circle center longitude', required: true}),
     radius: Flags.string({description: 'circle radius in meters (0-50000)', default: '5000'}),

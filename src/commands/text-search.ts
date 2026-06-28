@@ -1,6 +1,6 @@
 import {Args, Flags} from '@oclif/core'
 
-import {BaseCommand} from '../base.js'
+import {BaseCommand, searchFlags} from '../base.js'
 import {ENDPOINTS, type PlacesResponse} from '../places-client.js'
 import {PlacesApiError} from '../util/errors.js'
 import {resolveFields} from '../util/fields.js'
@@ -23,6 +23,7 @@ export default class TextSearch extends BaseCommand {
 
   static flags = {
     ...BaseCommand.baseFlags,
+    ...searchFlags,
     max: Flags.integer({description: 'target number of results (1-60); auto-paginates as needed', default: 20}),
     'page-size': Flags.integer({description: 'results per request (1-20)', default: 20}),
     language: Flags.string({description: 'languageCode', default: 'en'}),

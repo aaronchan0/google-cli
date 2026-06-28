@@ -56,7 +56,31 @@ Flags: `--lat`/`--lng` (required), `--radius` (def 5000, ≤50000),
 `--type` (def `japanese_inn`, comma list → `includedTypes`), `--max` (1-20),
 `--rank POPULARITY|DISTANCE` (def `DISTANCE`), `--language`, `--region`.
 
-## Common flags (all commands)
+### `photo <name>`
+
+Fetch a place photo via the getMedia endpoint. `<name>` is a photo's resource
+name — the `name` field from a place's `photos[]` (format
+`places/PLACE_ID/photos/PHOTO_REF`); `/media` is appended automatically. **One
+photo per call.** Pick a mode:
+
+```bash
+# get a photo name from a search (text output doesn't print names; use --json)
+NAME=$(google-cli text-search "Ukai Japanese Bistro San Ramon" --region US \
+  --max 1 --fields photos --json | jq -r '.places[0].photos[0].name')
+
+google-cli photo "$NAME" --out photo.jpg --max-width 800   # download the image
+google-cli photo "$NAME" --url                             # print a short-lived photoUri
+```
+
+Flags: `--out, -o <file>` (download bytes) **or** `--url` (print `photoUri` via
+`skipHttpRedirect`) — one is required; `--max-width` / `--max-height` (1-4800).
+
+> ⚠️ Photo names **expire and can't be cached** — fetch soon after the search.
+> A place returns **at most 10** photos, so this is ≤10 calls per place. Each
+> `photo` fetch is one **Enterprise**-tier billable event ("Place Details
+> Photos" SKU; 1,000/month free, then ~$7/1,000) — separate from the search.
+
+## Common flags (search commands)
 
 | Flag | Purpose |
 |------|---------|
@@ -70,6 +94,8 @@ Flags: `--lat`/`--lng` (required), `--radius` (def 5000, ≤50000),
 
 Bare field names are auto-prefixed with `places.` (so `rating` →
 `places.rating`). `--fields` takes precedence over `--add-fields`/`--drop-fields`.
+(The `photo` command only uses `--api-key`/`--debug`; the field/output flags
+don't apply to binary media.)
 
 ### Default fields
 
