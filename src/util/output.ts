@@ -44,40 +44,19 @@ function formatValue(key: string, value: unknown): string {
   return String(value)
 }
 
-// Human-friendly labels for common fields; otherwise derive one from the field
-// name (e.g. `userRatingCount` -> "User Rating Count").
-const LABELS: Record<string, string> = {
-  displayName: 'Name',
-  formattedAddress: 'Address',
-  shortFormattedAddress: 'Address',
-  location: 'Location',
-  rating: 'Rating',
-  userRatingCount: 'Reviews',
-  primaryType: 'Type',
-  primaryTypeDisplayName: 'Type',
-  websiteUri: 'Website',
-  nationalPhoneNumber: 'Phone',
-  internationalPhoneNumber: 'Phone',
-  editorialSummary: 'Summary',
-  priceLevel: 'Price',
-  businessStatus: 'Status',
-  googleMapsUri: 'Maps',
-}
-
+// Label for a field line: the raw field name as requested, with the `places.`
+// prefix stripped (e.g. `places.userRatingCount` -> `userRatingCount`).
 function label(fieldPath: string): string {
-  const key = fieldPath.replace(/^places\./, '').split('.')[0]
-  if (LABELS[key]) return LABELS[key]
-  // camelCase -> "Title Case"
-  const spaced = key.replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-  return spaced.charAt(0).toUpperCase() + spaced.slice(1)
+  return fieldPath.replace(/^places\./, '')
 }
 
 const TOP_LEVEL = new Set(['nextPageToken', 'routingSummaries', 'contextualContents'])
 
-// Render each place as a labeled multi-line block:
-//   Name: …
-//   Address: …
-//   Rating: …
+// Render each place as a multi-line block, one "field: value" line per
+// requested field (raw field names, `places.` prefix stripped):
+//   displayName: …
+//   formattedAddress: …
+//   rating: …
 // Blank line between places. Empty fields are skipped.
 export function renderPlaces(places: Place[], requestedFields: string[]): string {
   // Per-place fields only; skip any top-level response fields.
