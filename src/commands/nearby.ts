@@ -3,7 +3,7 @@ import {Flags} from '@oclif/core'
 import {BaseCommand} from '../base.js'
 import {ENDPOINTS} from '../places-client.js'
 import {resolveFields} from '../util/fields.js'
-import {renderPlacesTable} from '../util/output.js'
+import {renderPlaces} from '../util/output.js'
 
 export default class Nearby extends BaseCommand {
   static description =
@@ -67,6 +67,6 @@ export default class Nearby extends BaseCommand {
       return
     }
     const requested = resolveFields(flags)
-    this.emit(renderPlacesTable(places, requested), 'text')
+    this.emit(renderPlaces(places, requested), 'text')
   }
 }

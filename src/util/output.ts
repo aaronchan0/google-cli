@@ -1,13 +1,13 @@
 // Output rendering for google-cli. Two modes: 'json' (pretty-printed JSON of
-// the whole response) and 'text' (a tab-separated table over the requested
-// fields, with nested values flattened for human reading).
+// the whole response) and 'text' (a labeled, multi-line block per place — one
+// "Label: value" line per requested field, blank line between places).
 
 export type OutputMode = 'text' | 'json'
 
 type Place = Record<string, unknown>
 
 // Pull a (possibly nested) value out of a place object given a mask path like
-// `places.displayName` or `displayName.text`, and render it as a compact cell.
+// `places.displayName` or `displayName.text`, and render it as a compact value.
 function cell(place: Place, fieldPath: string): string {
   // Strip a leading `places.` — within a single place, paths are relative.
   const path = fieldPath.replace(/^places\./, '')
@@ -44,25 +44,58 @@ function formatValue(key: string, value: unknown): string {
   return String(value)
 }
 
-// Header label for a column (drop the `places.` prefix).
-function header(fieldPath: string): string {
-  return fieldPath.replace(/^places\./, '')
+// Human-friendly labels for common fields; otherwise derive one from the field
+// name (e.g. `userRatingCount` -> "User Rating Count").
+const LABELS: Record<string, string> = {
+  displayName: 'Name',
+  formattedAddress: 'Address',
+  shortFormattedAddress: 'Address',
+  location: 'Location',
+  rating: 'Rating',
+  userRatingCount: 'Reviews',
+  primaryType: 'Type',
+  primaryTypeDisplayName: 'Type',
+  websiteUri: 'Website',
+  nationalPhoneNumber: 'Phone',
+  internationalPhoneNumber: 'Phone',
+  editorialSummary: 'Summary',
+  priceLevel: 'Price',
+  businessStatus: 'Status',
+  googleMapsUri: 'Maps',
+}
+
+function label(fieldPath: string): string {
+  const key = fieldPath.replace(/^places\./, '').split('.')[0]
+  if (LABELS[key]) return LABELS[key]
+  // camelCase -> "Title Case"
+  const spaced = key.replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1)
 }
 
 const TOP_LEVEL = new Set(['nextPageToken', 'routingSummaries', 'contextualContents'])
 
-export function renderPlacesTable(places: Place[], requestedFields: string[]): string {
-  // Render per-place fields as columns; skip any top-level response fields.
-  const cols = requestedFields.filter((f) => !TOP_LEVEL.has(f))
+// Render each place as a labeled multi-line block:
+//   Name: …
+//   Address: …
+//   Rating: …
+// Blank line between places. Empty fields are skipped.
+export function renderPlaces(places: Place[], requestedFields: string[]): string {
+  // Per-place fields only; skip any top-level response fields.
+  const fields = requestedFields.filter((f) => !TOP_LEVEL.has(f))
 
   if (places.length === 0) return '(no results)'
 
-  const lines: string[] = []
-  lines.push(cols.map(header).join('\t'))
+  const blocks: string[] = []
   for (const p of places) {
-    lines.push(cols.map((c) => cell(p, c)).join('\t'))
+    const lines: string[] = []
+    for (const f of fields) {
+      const value = cell(p, f)
+      if (value === '') continue
+      lines.push(`${label(f)}: ${value}`)
+    }
+    blocks.push(lines.join('\n'))
   }
-  return lines.join('\n')
+  return blocks.join('\n\n')
 }
 
 export function emit(data: unknown, mode: OutputMode): void {

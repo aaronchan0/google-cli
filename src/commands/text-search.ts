@@ -4,7 +4,7 @@ import {BaseCommand} from '../base.js'
 import {ENDPOINTS, type PlacesResponse} from '../places-client.js'
 import {PlacesApiError} from '../util/errors.js'
 import {resolveFields} from '../util/fields.js'
-import {renderPlacesTable} from '../util/output.js'
+import {renderPlaces} from '../util/output.js'
 
 export default class TextSearch extends BaseCommand {
   static description =
@@ -104,6 +104,6 @@ export default class TextSearch extends BaseCommand {
       return
     }
     const requested = resolveFields(flags)
-    this.emit(renderPlacesTable(trimmed, requested), 'text')
+    this.emit(renderPlaces(trimmed, requested), 'text')
   }
 }

@@ -60,7 +60,7 @@ Flags: `--lat`/`--lng` (required), `--radius` (def 5000, ≤50000),
 
 | Flag | Purpose |
 |------|---------|
-| `--json` | Emit raw JSON instead of the text table (default: text) |
+| `--json` | Emit raw JSON instead of the text output (default: text) |
 | `--fields a,b,c` | **Replace** the default field set entirely |
 | `--add-fields a,b` | **Add** fields to the defaults |
 | `--drop-fields a` | **Remove** fields from the defaults |
