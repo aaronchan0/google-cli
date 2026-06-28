@@ -28,7 +28,7 @@ export default class Photo extends BaseCommand {
     out: Flags.string({char: 'o', description: 'download the image to this file path'}),
     url: Flags.boolean({description: 'print the short-lived photoUri instead of downloading (skipHttpRedirect=true)'}),
     'max-width': Flags.integer({description: 'maxWidthPx (1-4800)'}),
-    'max-height': Flags.integer({description: 'maxHeightPx (1-4800); defaults to 1080 if neither dimension is set'}),
+    'max-height': Flags.integer({description: 'maxHeightPx (1-4800). If neither dimension is set, both default to 1920 (long-edge cap → ~1080p short side in either orientation)'}),
   }
 
   async run(): Promise<void> {
@@ -43,10 +43,16 @@ export default class Photo extends BaseCommand {
     }
 
     const clamp = (n?: number) => (n === undefined ? undefined : Math.min(Math.max(n, 1), 4800))
-    const maxWidthPx = clamp(flags['max-width'])
+    let maxWidthPx = clamp(flags['max-width'])
     let maxHeightPx = clamp(flags['max-height'])
-    // getMedia requires at least one dimension; default to 1080p height if neither given.
-    if (maxWidthPx === undefined && maxHeightPx === undefined) maxHeightPx = 1080
+    // getMedia requires at least one dimension and always preserves aspect ratio
+    // (it scales so the LONGER edge fits). Defaulting only maxHeight would shrink
+    // a portrait's width well below 1080; cap BOTH edges at 1920 so the short
+    // side lands ~1080 in either orientation (≈1080p-class).
+    if (maxWidthPx === undefined && maxHeightPx === undefined) {
+      maxWidthPx = 1920
+      maxHeightPx = 1920
+    }
 
     if (flags.url) {
       const media = await getPhotoUri({photoName: args.name, apiKey, maxWidthPx, maxHeightPx, debug: flags.debug})
