@@ -6,12 +6,16 @@ import {emit, type OutputMode} from './util/output.js'
 
 // Shared base for all google-cli commands: auth, field-mask construction,
 // the Places HTTP call, and output. Mirrors the slack-cli BaseCommand pattern.
+// Field names accepted by --fields/--add-fields/--drop-fields come from the
+// Places API "Place" resource. See the full list and per-field meanings at:
+const FIELD_DOC = 'https://developers.google.com/maps/documentation/places/web-service/reference/rest/v1/places'
+
 export abstract class BaseCommand extends Command {
   static baseFlags = {
     json: Flags.boolean({description: 'Emit the raw JSON response instead of a text table'}),
-    fields: Flags.string({description: 'Comma-separated field list that REPLACES the default fields'}),
-    'add-fields': Flags.string({description: 'Comma-separated fields to ADD to the defaults'}),
-    'drop-fields': Flags.string({description: 'Comma-separated fields to REMOVE from the defaults'}),
+    fields: Flags.string({description: `Comma-separated field list that REPLACES the defaults. Field names: ${FIELD_DOC}`}),
+    'add-fields': Flags.string({description: 'Comma-separated fields to ADD to the defaults (see --fields for the field list)'}),
+    'drop-fields': Flags.string({description: 'Comma-separated fields to REMOVE from the defaults (see --fields for the field list)'}),
     'api-key': Flags.string({description: 'API key (overrides the GOOGLE_API_KEY env var)'}),
     debug: Flags.boolean({description: 'Log request URL, body, field mask, and HTTP status to stderr'}),
   }
